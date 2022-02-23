@@ -52,4 +52,23 @@ public class Bag {
     public void addCuboid(Cuboid cuboid) {
         cuboids.add(cuboid);
     }
+
+    //Calculate the total volume of all the cuboids in the bag.
+    private double getPayloadVolume(){
+        double sum = 0.0d;
+        if (cuboids != null){
+            for (Cuboid c: cuboids ){
+                sum += c.getVolume();
+            }
+        }
+        return sum;
+    }
+
+    //Calculating the available volume in the bag.
+    public double getAvailableVolume(){
+        double avail = 0.0d;
+        double payloadVolume = getPayloadVolume();
+        avail = volume - payloadVolume;
+        return avail;
+    }
 }

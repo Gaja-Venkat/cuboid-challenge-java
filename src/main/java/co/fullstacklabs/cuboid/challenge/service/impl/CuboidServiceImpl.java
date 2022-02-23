@@ -2,6 +2,7 @@ package co.fullstacklabs.cuboid.challenge.service.impl;
 
 import co.fullstacklabs.cuboid.challenge.dto.CuboidDTO;
 import co.fullstacklabs.cuboid.challenge.exception.ResourceNotFoundException;
+import co.fullstacklabs.cuboid.challenge.exception.UnprocessableEntityException;
 import co.fullstacklabs.cuboid.challenge.model.Bag;
 import co.fullstacklabs.cuboid.challenge.model.Cuboid;
 import co.fullstacklabs.cuboid.challenge.repository.BagRepository;
@@ -48,10 +49,27 @@ public class CuboidServiceImpl implements CuboidService {
     public CuboidDTO create(CuboidDTO cuboidDTO) {
         Bag bag = getBagById(cuboidDTO.getBagId());
         Cuboid cuboid = mapper.map(cuboidDTO, Cuboid.class);
+        if (bag.getAvailableVolume() < cuboid.getVolume()){
+            throw new UnprocessableEntityException("Not Enough space in the bag") ;
+        }
         cuboid.setBag(bag);
         cuboid = repository.save(cuboid);
         return mapper.map(cuboid, CuboidDTO.class);
     }
+    @Override
+    @Transactional
+    public CuboidDTO update(CuboidDTO cuboidDTO) {
+        getCuboidById(cuboidDTO.getId());
+        Bag bag = getBagById(cuboidDTO.getBagId());
+        Cuboid cuboid = mapper.map(cuboidDTO, Cuboid.class);
+        if (bag.getAvailableVolume() < cuboid.getVolume()){
+            throw new UnprocessableEntityException("Not Enough space in the bag") ;
+        }
+        cuboid.setBag(bag);
+        cuboid = repository.save(cuboid);
+        return mapper.map(cuboid, CuboidDTO.class);
+    }
+
 
     /**
      * List all cuboids
@@ -68,6 +86,9 @@ public class CuboidServiceImpl implements CuboidService {
         return bagRepository.findById(bagId).orElseThrow(() -> new ResourceNotFoundException("Bag not found"));
     }
 
+    private Cuboid getCuboidById(long cuboidId) {
+        return repository.findById(cuboidId).orElseThrow(() -> new ResourceNotFoundException("Cuboid not found"));
+    }
 
   
 }
